@@ -1,0 +1,27 @@
+[
+	{
+	  "id": "trading101",
+	  "title": "Trading Mastery",
+	  "description": "6-module trading course for beginners",
+	  "modules": [
+		 { "id": "m1", "title": "Intro & Setup" },
+		 { "id": "m2", "title": "Market Basics" },
+		 { "id": "m3", "title": "Risk Management" },
+		 { "id": "m4", "title": "Strategies" },
+		 { "id": "m5", "title": "Backtesting" },
+		 { "id": "m6", "title": "Final Project" }
+	  ]
+	},
+	{
+	  "id": "photography",
+	  "title": "Photography Bootcamp",
+	  "description": "Learn composition and lighting in 4 modules",
+	  "modules": [
+		 { "id": "p1", "title": "Camera Basics" },
+		 { "id": "p2", "title": "Composition" },
+		 { "id": "p3", "title": "Lighting" },
+		 { "id": "p4", "title": "Editing" }
+	  ]
+	}
+ ]
+ 
