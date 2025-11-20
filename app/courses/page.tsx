@@ -17,6 +17,9 @@ export default function CoursesPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  const [whopId, setWhopId] = useState("");
+  const [whopCourses, setWhopCourses] = useState<any[]>([]);
   const [message, setMessage] = useState("");
 
   // Fetch Whop role
@@ -33,7 +36,7 @@ export default function CoursesPage() {
     loadRole();
   }, []);
 
-  // Fetch courses
+  // Fetch Courses
   const fetchCourses = async () => {
     setLoading(true);
     try {
@@ -73,10 +76,25 @@ export default function CoursesPage() {
     fetchCourses();
   };
 
-  // Connect Whop Course button
-  const handleConnectWhop = () => {
-    console.log("Connect Whop Course clicked!");
-    setMessage("Button clicked! Your Whop courses will appear here soon.");
+  // Connect Whop Course
+  const handleConnectWhop = async (id: string) => {
+    if (!id) return alert("Enter a Whop course ID");
+
+    try {
+      const res = await fetch(`/api/whop-course/${id}`);
+      const data = await res.json();
+
+      if (!data.ok) {
+        alert("Failed to fetch Whop course");
+        return;
+      }
+
+      setWhopCourses([data.course]);
+      setMessage(`Connected Whop course: ${data.course.title}`);
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting Whop course");
+    }
   };
 
   return (
@@ -108,20 +126,42 @@ export default function CoursesPage() {
               Create Course
             </button>
           </div>
+
+          {/* Connect Whop Course */}
+          <div>
+            <h2 className="text-xl font-semibold mb-3">Connect Existing Whop Course</h2>
+            <input
+              type="text"
+              placeholder="Enter Whop course ID (cors_XXXX)"
+              value={whopId}
+              onChange={(e) => setWhopId(e.target.value)}
+              className="border p-2 rounded mb-2 w-full"
+            />
+            <button
+              onClick={() => handleConnectWhop(whopId)}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Connect Whop Course
+            </button>
+
+            {message && <p className="mt-2 text-green-600">{message}</p>}
+
+            {whopCourses.length > 0 && (
+              <div className="mt-4 border p-3 rounded shadow-sm bg-gray-50">
+                <h3 className="font-semibold">{whopCourses[0].title}</h3>
+                <p>{whopCourses[0].description}</p>
+                {whopCourses[0].cover_image && (
+                  <img
+                    src={whopCourses[0].cover_image}
+                    alt={whopCourses[0].title}
+                    className="w-32 mt-2"
+                  />
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
-
-      {/* Connect Whop Course — always visible for now */}
-      <div className="border p-4 rounded-lg shadow-sm mb-8">
-        <h2 className="text-xl font-semibold mb-3">Connect Existing Course</h2>
-        <button
-          onClick={handleConnectWhop}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Connect Whop Course
-        </button>
-        {message && <p className="mt-2 text-green-600">{message}</p>}
-      </div>
 
       {/* Courses List */}
       {loading ? (
