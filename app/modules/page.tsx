@@ -18,6 +18,9 @@ function ModulesContent() {
   const [role, setRole] = useState<"owner" | "member">("member");
   const [title, setTitle] = useState("");
 
+  const [whopModules, setWhopModules] = useState<any[]>([]);
+  const [whopMessage, setWhopMessage] = useState("");
+
   // Load role
   useEffect(() => {
     const loadRole = async () => {
@@ -66,6 +69,22 @@ function ModulesContent() {
     fetchModules();
   };
 
+  // FETCH WHOP MODULES
+  const fetchWhopModules = async () => {
+    if (!courseId) return;
+
+    const res = await fetch(`/api/whop-course/${courseId}/modules`);
+    const data = await res.json();
+
+    if (!data.ok) {
+      setWhopMessage("Could not load Whop modules.");
+      return;
+    }
+
+    setWhopModules(data.modules);
+    setWhopMessage("Whop modules loaded!");
+  };
+
   return (
     <main className="p-8 max-w-3xl mx-auto">
       <h1 className="text-4xl font-bold mb-6">Modules</h1>
@@ -90,6 +109,32 @@ function ModulesContent() {
         </div>
       )}
 
+      {/* FETCH WHOP MODULES BUTTON */}
+      <div className="border p-4 rounded-lg shadow-sm mb-8">
+        <h2 className="text-xl font-semibold mb-3">Whop Modules</h2>
+        <button
+          onClick={fetchWhopModules}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Load Whop Modules
+        </button>
+        {whopMessage && <p className="mt-2 text-blue-600">{whopMessage}</p>}
+
+        {whopModules.length > 0 && (
+          <div className="mt-4 space-y-3">
+            {whopModules.map((mod: any) => (
+              <div
+                key={mod.id}
+                className="border p-4 rounded-lg shadow-sm bg-blue-50"
+              >
+                <h3 className="text-xl font-semibold">{mod.title}</h3>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Normal modules */}
       {loading ? (
         <p>Loading modules...</p>
       ) : modules.length === 0 ? (
@@ -120,4 +165,3 @@ export default function ModulesPage() {
     </Suspense>
   );
 }
-
