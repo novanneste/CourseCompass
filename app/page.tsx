@@ -2,12 +2,22 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 type Role = "owner" | "member";
 
 export default function DashboardPage() {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Redirect /modules to homepage
+  useEffect(() => {
+    if (pathname === "/modules") {
+      router.replace("/");
+    }
+  }, [pathname, router]);
 
   // Fetch Whop context
   useEffect(() => {
@@ -70,7 +80,7 @@ export default function DashboardPage() {
 
         {/* Start From Scratch */}
         <button
-          onClick={() => window.location.href = "/course-customize/new"}
+          onClick={() => router.push("/course-customize/new")}
           className="w-full bg-[#1a1a1a] border border-white/10 py-3 rounded-xl font-semibold text-center hover:bg-[#222] transition-all"
         >
           Start From Scratch
