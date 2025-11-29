@@ -24,14 +24,18 @@ To run this project:
 
 2. Go to [Vercel](https://vercel.com/new) and link the repository. Deploy your application with the environment variables from your `.env.local`
 
-3. If necessary update you "Base Domain" and webhook callback urls on the app settings page on the whop dashboard.
+3. If necessary update your "Base Domain" and webhook callback urls on the app settings page on the whop dashboard.
 
 ## Troubleshooting
 
-**App not loading properly?** Make sure to set the "App path" in your Whop developer dashboard. The placeholder text in the UI does not mean it's set - you must explicitly enter `/experiences/[experienceId]` (or your chosen path name)
-a
+**App not loading properly?**  
+Make sure to set the "App path" in your Whop developer dashboard. The placeholder text in the UI does not mean it's set — you must explicitly enter `/experiences/[experienceId]` (or your chosen path name)
 
-**Make sure to add env.local** Make sure to get the real app environment vairables from your whop dashboard and set them in .env.local
-
+**Make sure to add env.local**  
+Make sure to get the real app environment variables from your whop dashboard and set them in `.env.local`
 
 For more info, see our docs at https://dev.whop.com/introduction
+
+---
+
+Last updated: testing new Vercel deploy
