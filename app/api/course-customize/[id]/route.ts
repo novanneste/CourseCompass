@@ -6,11 +6,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
-  const courseId = context.params.id;
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  // context.params is a Promise in Next.js 16+
+  const { id: courseId } = await context.params;
 
   const { data: course, error } = await supabase
     .from("courses")
@@ -18,9 +16,7 @@ export async function GET(
     .eq("id", courseId)
     .single();
 
-  if (error) {
-    return NextResponse.json({ ok: false, error: error.message });
-  }
+  if (error) return NextResponse.json({ ok: false, error: error.message });
 
   const { data: modules } = await supabase
     .from("modules")
@@ -28,9 +24,5 @@ export async function GET(
     .eq("course_id", courseId)
     .order("created_at", { ascending: true });
 
-  return NextResponse.json({
-    ok: true,
-    course,
-    modules: modules ?? [],
-  });
+  return NextResponse.json({ ok: true, course, modules });
 }
