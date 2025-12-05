@@ -1,28 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getCourseById } from "@/lib/queries/courses";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
 
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  // context.params is a Promise in Next.js 16+
-  const { id: courseId } = await context.params;
+    if (!id) {
+      return NextResponse.json(
+        { ok: false, error: "Missing course ID" },
+        { status: 400 }
+      );
+    }
 
-  const { data: course, error } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("id", courseId)
-    .single();
+    const course = await getCourseById(id);
 
-  if (error) return NextResponse.json({ ok: false, error: error.message });
+    if (!course) {
+      return NextResponse.json(
+        { ok: false, error: "Course not found" },
+        { status: 404 }
+      );
+    }
 
-  const { data: modules } = await supabase
-    .from("modules")
-    .select("*")
-    .eq("course_id", courseId)
-    .order("created_at", { ascending: true });
-
-  return NextResponse.json({ ok: true, course, modules });
+    return NextResponse.json({
+      ok: true,
+      course,
+    });
+  } catch (error: any) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      { ok: false, error: "Server error" },
+      { status: 500 }
+    );
+  }
 }
