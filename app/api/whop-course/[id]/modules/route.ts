@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
 
   try {
     const res = await fetch(`https://api.whop.com/v1/courses/${id}/modules`, {
@@ -11,14 +14,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     });
 
     if (!res.ok) {
-      return NextResponse.json({ ok: false, error: "Failed to fetch modules" }, { status: res.status });
+      return NextResponse.json(
+        { ok: false, error: "Failed to fetch modules" },
+        { status: res.status }
+      );
     }
 
     const modules = await res.json();
-
     return NextResponse.json({ ok: true, modules });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Server error" },
+      { status: 500 }
+    );
   }
 }
