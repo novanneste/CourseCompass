@@ -1,31 +1,38 @@
-// app/api/whop-course/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { getCourseById } from "@/lib/queries/courses";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params; // Get the course ID from the URL
-  const WHOP_API_KEY = process.env.WHOP_API_KEY; // Your Whop app API key from .env
-
-  if (!WHOP_API_KEY) {
-    return NextResponse.json({ ok: false, error: 'Missing WHOP_API_KEY in environment' }, { status: 500 });
-  }
-
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const res = await fetch(`https://api.whop.com/v1/courses/${id}`, {
-      headers: {
-        Authorization: `Bearer ${WHOP_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const { id } = await context.params;
 
-    if (!res.ok) {
-      return NextResponse.json({ ok: false, error: 'Failed to fetch course from Whop' }, { status: res.status });
+    if (!id) {
+      return NextResponse.json(
+        { ok: false, error: "Missing course ID" },
+        { status: 400 }
+      );
     }
 
-    const course = await res.json();
+    const course = await getCourseById(id);
 
-    return NextResponse.json({ ok: true, course });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ ok: false, error: 'Error fetching course' }, { status: 500 });
+    if (!course) {
+      return NextResponse.json(
+        { ok: false, error: "Course not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      course,
+    });
+  } catch (error: any) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      { ok: false, error: "Server error" },
+      { status: 500 }
+    );
   }
 }
