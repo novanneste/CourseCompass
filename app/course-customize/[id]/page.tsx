@@ -6,11 +6,14 @@ import { useState } from "react";
 type ContentItem = {
   id: string;
   title: string;
+  type: "file";
+  fileName: string;
 };
 
 type Milestone = {
   id: string;
   title: string;
+  description: string;
   contents: ContentItem[];
 };
 
@@ -20,23 +23,26 @@ export default function CourseCompassPage() {
 
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [newMilestoneTitle, setNewMilestoneTitle] = useState("");
+  const [newMilestoneDescription, setNewMilestoneDescription] = useState("");
 
   function addMilestone() {
     if (!newMilestoneTitle.trim()) return;
 
-    setMilestones([
-      ...milestones,
+    setMilestones((prev) => [
+      ...prev,
       {
         id: crypto.randomUUID(),
         title: newMilestoneTitle,
+        description: newMilestoneDescription,
         contents: [],
       },
     ]);
 
     setNewMilestoneTitle("");
+    setNewMilestoneDescription("");
   }
 
-  function addContent(milestoneId: string) {
+  function addFileContent(milestoneId: string, file: File) {
     setMilestones((prev) =>
       prev.map((m) =>
         m.id === milestoneId
@@ -46,7 +52,9 @@ export default function CourseCompassPage() {
                 ...m.contents,
                 {
                   id: crypto.randomUUID(),
-                  title: `New Content ${m.contents.length + 1}`,
+                  title: file.name,
+                  type: "file",
+                  fileName: file.name,
                 },
               ],
             }
@@ -75,17 +83,26 @@ export default function CourseCompassPage() {
       </div>
 
       {/* Add Milestone */}
-      <div className="mb-6 flex gap-3">
+      <div className="mb-8 space-y-3">
         <input
           value={newMilestoneTitle}
           onChange={(e) => setNewMilestoneTitle(e.target.value)}
           placeholder="Milestone title (e.g. Getting Started)"
-          className="flex-1 bg-black border border-white/10 rounded-lg px-4 py-3"
+          className="w-full bg-black border border-white/10 rounded-lg px-4 py-3"
+        />
+
+        <textarea
+          value={newMilestoneDescription}
+          onChange={(e) =>
+            setNewMilestoneDescription(e.target.value)
+          }
+          placeholder="Milestone description"
+          className="w-full bg-black border border-white/10 rounded-lg px-4 py-3"
         />
 
         <button
           onClick={addMilestone}
-          className="bg-gradient-to-r from-[#ff5a1f] to-[#ff9966] rounded-lg px-6 font-semibold"
+          className="bg-gradient-to-r from-[#ff5a1f] to-[#ff9966] rounded-lg px-6 py-2 font-semibold"
         >
           Add Milestone
         </button>
@@ -104,17 +121,34 @@ export default function CourseCompassPage() {
             key={milestone.id}
             className="bg-[#141414] border border-white/10 rounded-xl p-6"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">{milestone.title}</h2>
+            <h2 className="text-lg font-semibold">
+              {milestone.title}
+            </h2>
 
-              <button
-                onClick={() => addContent(milestone.id)}
-                className="text-sm border border-white/10 rounded-lg px-3 py-1 hover:bg-white/5"
-              >
-                + Add Content
-              </button>
+            <p className="text-white/50 text-sm mb-4">
+              {milestone.description}
+            </p>
+
+            {/* Add Content */}
+            <div className="mb-4">
+              <label className="block text-sm text-white/60 mb-2">
+                Add File Content
+              </label>
+
+              <input
+                type="file"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    addFileContent(
+                      milestone.id,
+                      e.target.files[0]
+                    );
+                  }
+                }}
+              />
             </div>
 
+            {/* Content List */}
             {milestone.contents.length === 0 ? (
               <p className="text-white/40 text-sm">
                 No content yet.
@@ -126,7 +160,7 @@ export default function CourseCompassPage() {
                     key={content.id}
                     className="bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                   >
-                    {content.title}
+                    📁 {content.fileName}
                   </li>
                 ))}
               </ul>
@@ -137,3 +171,4 @@ export default function CourseCompassPage() {
     </div>
   );
 }
+
