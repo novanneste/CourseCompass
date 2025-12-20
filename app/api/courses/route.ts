@@ -1,35 +1,57 @@
 import { NextResponse } from "next/server";
+import { supabase } from "../../../lib/supabaseClient";
 
 export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    courses: [],
-  });
+  try {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ courses: data ?? [] });
+  } catch {
+    return NextResponse.json(
+      { error: "Server failed to fetch courses" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { title, description } = body;
+    const { title, description } = await req.json();
 
-    if (!title) {
+    if (!title || !title.trim()) {
       return NextResponse.json(
         { error: "Title is required" },
         { status: 400 }
       );
     }
 
-    const id = crypto.randomUUID();
+    const { data, error } = await supabase
+      .from("courses")
+      .insert({ title, description })
+      .select()
+      .single();
 
-    return NextResponse.json({
-      ok: true,
-      id,
-      title,
-      description,
-    });
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ ok: true, course: data });
   } catch {
     return NextResponse.json(
-      { error: "Invalid JSON body" },
+      { error: "Invalid request body" },
       { status: 400 }
     );
   }

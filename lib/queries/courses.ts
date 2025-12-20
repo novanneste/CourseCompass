@@ -1,5 +1,5 @@
 // lib/queries/courses.ts
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabaseClient";
 
 export async function getCourseById(id: string) {
   const { data, error } = await supabase
